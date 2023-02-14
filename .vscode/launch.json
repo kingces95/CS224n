@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python: Current File",
             "type": "python",
@@ -11,8 +12,27 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/ps3",
-            "args": ["-d"]
+            "cwd": "${workspaceFolder}/ps4",
+            "args": ["1f"]
+        },
+        {
+            "name": "Python: Run",
+            "type": "python",
+            "request": "launch",
+            "program": "/workspaces/CS224n/ps4/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/ps4",
+            "args": [
+                "train",
+                "--train-src=./zh_en_data/train_debug.zh",
+                "--train-tgt=./zh_en_data/train_debug.en",
+                "--dev-src=./zh_en_data/dev.zh",
+                "--dev-tgt=./zh_en_data/dev.en",
+                "--vocab=vocab.json",
+                "--lr=5e-4",
+                "--max-epoch=200",
+                "--valid-niter=100"]
         }
     ]
 }

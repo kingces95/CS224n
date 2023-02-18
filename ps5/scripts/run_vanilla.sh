@@ -15,7 +15,12 @@ python src/run.py evaluate vanilla wiki.txt  \
         --reading_params_path vanilla.finetune.params \
         --eval_corpus_path birth_dev.tsv \
         --outputs_path vanilla.pretrain.dev.predictions
-        
+
+python src/run.py evaluate vanilla wiki.txt  \
+        --reading_params_path vanilla.pretrain.params \
+        --eval_corpus_path birth_dev.tsv \
+        --outputs_path vanilla.pretrain.only.dev.predictions
+
 # Evaluate on the test set; write to disk
 python src/run.py evaluate vanilla wiki.txt  \
         --reading_params_path vanilla.finetune.params \

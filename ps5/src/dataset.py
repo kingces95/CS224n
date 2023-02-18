@@ -2,6 +2,7 @@ import random
 import torch
 from torch.utils.data import Dataset
 import argparse
+import numpy as np
 
 """
 The input-output pairs (x, y) of the NameDataset are of the following form:
@@ -166,9 +167,73 @@ class CharCorruptionDataset(Dataset):
         # returns the length of the dataset
         return len(self.data)
 
+        
     def __getitem__(self, idx):
-        # TODO [part e]: see spec above
-        raise NotImplementedError
+        # 0. Use the idx argument of __getitem__ to retrieve the element of self.data
+        # at the given index. We'll call the resulting data entry a document.
+        doc = self.data[idx]
+
+        # 1. Randomly truncate the document to a length no less than 4 characters,
+        # and no more than int(self.block_size*7/8) characters.        
+        doc = doc[:np.random.randint(4, int(self.block_size * 7 / 8 + 1))]
+
+        # 2. Now, break the (truncated) document into three substrings:
+        #     [prefix] [masked_content] [suffix]
+        #   In other words, choose three strings prefix, masked_content and suffix
+        #     such that prefix + masked_content + suffix = [the original document].
+        #   The length of [masked_content] should be random, and 1/4 the length of the
+        #     truncated document on average.
+        variance = 0.1
+        mean = 0.25
+        masked_content_len = int(
+            np.clip( # else we get errors "ValueError: high <= 0" when the whole string is replaced
+                len(doc) * np.random.normal(mean, variance), # mean length is 1/4 the doc
+                1, # leave at least one char for the prefix
+                len(doc) - 2 # leave at least one char for the suffix
+            )
+        )
+        masked_content_start = np.random.randint(
+            1, # leave at least one char for the prefix
+            len(doc) - masked_content_len
+        )
+        masked_content_end = masked_content_start + masked_content_len
+
+        # split doc into prefix, masked_content, and suffix
+        prefix = doc[:masked_content_start]
+        masked_content = doc[masked_content_start:masked_content_end]
+        suffix = doc[masked_content_end:]
+
+        # 3. Rearrange these substrings into the following form:
+        #     [prefix] MASK_CHAR [suffix] MASK_CHAR [masked_content] [pads]
+        #   This resulting string, denoted masked_string, serves as the output example.
+        #   Here MASK_CHAR is the masking character defined in Vocabulary Specification,
+        #     and [pads] is a string of repeated PAD_CHAR characters chosen so that the
+        #     entire string is of length self.block_size.
+        #   Intuitively, the [masked_content], a string, is removed from the document and
+        #     replaced with MASK_CHAR (the masking character defined in Vocabulary
+        #     Specification). After the suffix of the string, the MASK_CHAR is seen again,
+        #     followed by the content that was removed, and the padding characters.
+        masked_content = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content
+        masked_content += self.PAD_CHAR * (self.block_size - len(masked_content))
+
+        # 4. We now use masked_string to construct the input and output example pair. To
+        # do so, simply take the input string to be masked_string[:-1], and the output
+        # string to be masked_string[1:]. In other words, for each character, the goal is
+        # to predict the next character in the masked string.
+        encoded_masked_content = [self.stoi[c] for c in masked_content]
+        x = torch.tensor(encoded_masked_content[:-1], dtype=torch.long)
+        y = torch.tensor(encoded_masked_content[1:], dtype=torch.long)
+        return x, y
+
+        # inp, oup = self.data[idx].split('\t')
+        # x = inp + self.MASK_CHAR + oup + self.MASK_CHAR
+        # x = x + self.PAD_CHAR*(self.block_size - len(x))
+        # y = self.PAD_CHAR*(len(inp)-1) + x[len(inp):]
+        
+        # x = x[:-1]
+        # x = torch.tensor([self.stoi[c] for c in x], dtype=torch.long)
+        # y = torch.tensor([self.stoi[c] for c in y], dtype=torch.long)
+        # return x, y
 
 """
 Code under here is strictly for your debugging purposes; feel free to modify

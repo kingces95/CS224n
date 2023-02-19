@@ -33,6 +33,25 @@
                 "--lr=5e-4",
                 "--max-epoch=200",
                 "--valid-niter=100"]
+        },
+        {
+            "name": "Python: Perceiver",
+            "type": "python",
+            "request": "launch",
+            "program": "/workspaces/CS224n/ps5/src/run.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/ps5",
+            "args": [
+                "pretrain",
+                "perceiver",
+                "wiki.txt",
+                "--bottleneck_dim",
+                "64",
+                "--pretrain_lr",
+                "6e-3",
+                "--writing_params_path",
+                "perceiver.pretrain.params"]
         }
     ]
 }

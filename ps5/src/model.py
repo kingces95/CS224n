@@ -104,7 +104,7 @@ class DownProjectBlock(nn.Module):
         super().__init__()
         ### YOUR CODE HERE
         ### Hint: Copy over the code from Block and make necessary modifications.
-        self.C = init_basis_vector_matrix(config.bottleneck_dim, config.n_embd)
+        self.C = nn.Parameter(init_basis_vector_matrix(config.bottleneck_dim, config.n_embd))
 
         self.ln1 = nn.LayerNorm(config.n_embd)
         self.ln2 = nn.LayerNorm(config.n_embd)
